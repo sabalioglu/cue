@@ -8,6 +8,8 @@ cue-data.json
 
 # lookbook uretim ciktilari (repo genelindeki out/ kuralindan muaf)
 !lookbook/out/
+!lookbook2/out/
+!lookbook3/out/
 lookbook/state.json
 lookbook/logs/
 lookbook/__pycache__/
