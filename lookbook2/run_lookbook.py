@@ -290,15 +290,7 @@ def download(url: str, dest: Path):
 
 # ────────────────────────────────────────────────────────────── QC
 
-def garment_lab(path: Path, box=None):
-    im = Image.open(path).convert("RGB")
-    W, H = im.size
-    if box is None:
-        box = (int(W*0.35), int(H*0.35), int(W*0.65), int(H*0.60))
-    patch = np.asarray(im.crop(box)).astype(np.float64) / 255.0
-    med = np.median(patch.reshape(-1, 3), axis=0)
-    lab = skcolor.rgb2lab(med.reshape(1, 1, 3)).reshape(3)
-
+def _texture(im: Image.Image, box) -> float:
     g = np.asarray(im.crop(box).convert("L")).astype(np.float64) / 255.0
     F = np.abs(np.fft.fftshift(np.fft.fft2(g - g.mean())))
     cy, cx = np.array(F.shape) // 2
@@ -307,23 +299,66 @@ def garment_lab(path: Path, box=None):
     rmax = min(cy, cx)
     hi = F[(rad > rmax*0.25) & (rad <= rmax*0.85)].sum()
     tot = F[rad > 2].sum()
-    return lab, (hi / tot if tot else 0.0)
+    return hi / tot if tot else 0.0
+
+
+def garment_lab(path: Path, ref_h=None):
+    """Kumas bolgesini olcer.
+
+    ref_h yoksa (urun fotografi) karenin merkez kutusu kullanilir - stüdyo
+    fotografinda kumas zaten ortadadir. ref_h varsa (uretilen kare) kumas
+    RENGINDEN bulunur: sabit merkez kutusu ozne kadrajin kenarindayken arka
+    plani olcuyordu. Maske 'kromatik ve referans hue'nun +-60 derecesinde'
+    diye tanimli - ten, bej pantolon ve notr duvar disarida kalir, ama band
+    gercek bir renk kaymasini yakalayacak kadar genis. Kaplama orani da
+    donuyor: kumas beyaza yandiginda veya griye dustugunde maske kuculur,
+    bu da basli basina bir sinyaldir.
+    """
+    im = Image.open(path).convert("RGB")
+    W, H = im.size
+
+    if ref_h is None:
+        box = (int(W*0.35), int(H*0.35), int(W*0.65), int(H*0.60))
+        patch = np.asarray(im.crop(box)).astype(np.float64) / 255.0
+        med = np.median(patch.reshape(-1, 3), axis=0)
+        lab = skcolor.rgb2lab(med.reshape(1, 1, 3)).reshape(3)
+        return lab, _texture(im, box), 1.0
+
+    full = skcolor.rgb2lab(np.asarray(im).astype(np.float64) / 255.0)
+    C = np.hypot(full[:, :, 1], full[:, :, 2])
+    h = np.degrees(np.arctan2(full[:, :, 2], full[:, :, 1])) % 360
+    mask = (C > 2.0) & (np.abs((h - ref_h + 180) % 360 - 180) <= 60.0)
+    mask[:int(H*0.05), :] = mask[int(H*0.95):, :] = False   # kenar payi
+    mask[:, :int(W*0.05)] = mask[:, int(W*0.95):] = False
+
+    cover = mask.sum() / mask.size
+    if cover < 0.01:                       # kumas bulunamadi -> eski yonteme dus
+        box = (int(W*0.35), int(H*0.35), int(W*0.65), int(H*0.60))
+        patch = np.asarray(im.crop(box)).astype(np.float64) / 255.0
+        med = np.median(patch.reshape(-1, 3), axis=0)
+        return skcolor.rgb2lab(med.reshape(1, 1, 3)).reshape(3), _texture(im, box), cover
+
+    lab = np.median(full[mask], axis=0)
+    ys, xs = np.where(mask)
+    box = (int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1)
+    return lab, _texture(im, box), cover
 
 
 def qc_rows(ref_path: Path, frames: list):
-    ref_lab, ref_tex = garment_lab(ref_path)
+    ref_lab, ref_tex, _ = garment_lab(ref_path)
     rC = float(np.hypot(ref_lab[1], ref_lab[2]))
     rh = float(np.degrees(np.arctan2(ref_lab[2], ref_lab[1])) % 360)
     out = []
     for p in frames:
-        lab, tex = garment_lab(p)
+        lab, tex, cover = garment_lab(p, ref_h=rh)
         C = float(np.hypot(lab[1], lab[2]))
         h = float(np.degrees(np.arctan2(lab[2], lab[1])) % 360)
-        rec = dict(name=p.stem, L=lab[0], C=C, h=h,
+        rec = dict(name=p.stem, L=lab[0], C=C, h=h, cover=cover,
                    dC=abs(C-rC), dh=abs((h-rh+180) % 360 - 180),
                    dL=abs(lab[0]-ref_lab[0]),
                    tex=(tex/ref_tex if ref_tex else 0.0))
         f = []
+        if cover < 0.01:      f.append(f"kumas bulunamadi (kaplama {cover*100:.1f}%)")
         if rec["dC"]  > 2.0:  f.append(f"chroma dC={rec['dC']:.1f}")
         if rec["dh"]  > 2.0:  f.append(f"hue dh={rec['dh']:.1f}deg")
         if rec["dL"]  > 10.0: f.append(f"aciklik dL={rec['dL']:.1f}")
@@ -338,19 +373,20 @@ def qc_rows(ref_path: Path, frames: list):
 def qc_report(ref_path: Path, frames: list) -> str:
     (ref_lab, rC, rh, _), rows = qc_rows(ref_path, frames)
     body = [f"| {r['name']} | {r['L']:.1f} | {r['C']:.1f} | {r['h']:.1f} | {r['dC']:.2f} | "
-            f"{r['dh']:.2f} | {r['dL']:.1f} | {r['tex']:.2f} | "
+            f"{r['dh']:.2f} | {r['dL']:.1f} | {r['tex']:.2f} | {r['cover']*100:.0f}% | "
             f"{'PASS' if r['pass'] else '**FAIL** - ' + ', '.join(r['fails'])} |" for r in rows]
     npass = sum(r["pass"] for r in rows)
     return "\n".join([
         "# QC raporu - powder blue linen shirt lookbook", "",
         f"Referans (urun fotografi): **L\\* {ref_lab[0]:.1f} - C\\*ab {rC:.1f} - h {rh:.1f}deg**", "",
         "Esikler: `dC*ab <= 2.0` - `dh <= 2.0deg` - `dL* <= 10` - `L* <= 92` - `doku orani >= 0.70`", "",
-        "| kare | L* | C*ab | h(deg) | dC | dh | dL | doku | sonuc |",
-        "|---|---|---|---|---|---|---|---|---|",
+        "| kare | L* | C*ab | h(deg) | dC | dh | dL | doku | kaplama | sonuc |",
+        "|---|---|---|---|---|---|---|---|---|---|",
         *body, "",
         f"**Gecen: {npass}/{len(rows)}**", "",
-        "_Not: olcum karenin merkez kutusundan aliniyor. Segmentasyon (SAM3) eklendiginde "
-        "sadece kumas bolgesi olculerek dogruluk artar._",
+        "_Not: olcum kumas renginden turetilen maskeden aliniyor; arka plan, ten ve alt "
+        "parca disarida. Kaplama = maskenin kare alanina orani, kumasin ne kadarinin "
+        "olculdugunu gosterir. Segmentasyon (SAM3) ile maske daha da keskinlesir._",
     ])
 
 
@@ -385,7 +421,7 @@ def preflight():
             print(f"  {host:34s}: ULASILAMADI ({type(e).__name__})")
             ok = False
     if GARMENT.exists():
-        lab, tex = garment_lab(GARMENT)
+        lab, tex, _ = garment_lab(GARMENT)
         print(f"  referans olcum     : L*={lab[0]:.1f} C*ab={np.hypot(lab[1],lab[2]):.1f} "
               f"h={np.degrees(np.arctan2(lab[2],lab[1]))%360:.1f}deg doku={tex:.3f}")
     print("SONUC:", "HAZIR" if ok else "EKSIK VAR")
