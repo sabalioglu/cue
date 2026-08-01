@@ -5,3 +5,8 @@ native/systemaudio
 *.log
 .DS_Store
 cue-data.json
+
+# lookbook uretim ciktilari (repo genelindeki out/ kuralindan muaf)
+!lookbook/out/
+lookbook/state.json
+lookbook/logs/
