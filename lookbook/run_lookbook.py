@@ -175,10 +175,19 @@ def find_url(obj):
         if isinstance(o, str) and o.startswith("http"):
             hits.append(o)
         elif isinstance(o, dict):
-            for v in o.values(): walk(v)
+            for k, v in o.items():
+                # 'param' istegin kopyasi; icindeki referans URL'leri sonucla karisir
+                if k == "param": continue
+                walk(v)
         elif isinstance(o, list):
             for v in o: walk(v)
         elif isinstance(o, str):
+            pass
+    # sonuc URL'i 'resultJson' icinde gomulu bir JSON string olarak geliyor
+    if isinstance(obj, dict) and isinstance(obj.get("resultJson"), str):
+        try:
+            obj = {**obj, "resultJson": json.loads(obj["resultJson"])}
+        except Exception:
             pass
     walk(obj)
     for h in hits:
@@ -236,7 +245,7 @@ def create_task(prompt: str, refs: list, ar: str) -> str:
 def wait_task(task_id: str) -> str:
     t0, last, warned = time.time(), "", False
     while time.time() - t0 < POLL_TIMEOUT:
-        r = requests.get(f"{BASE}/api/v1/jobs/getTask",
+        r = requests.get(f"{BASE}/api/v1/jobs/recordInfo",
                          headers=hdrs(), params={"taskId": task_id}, timeout=60)
         j = r.json()
         (LOGS / f"{task_id}.json").write_text(json.dumps(j, indent=2))
