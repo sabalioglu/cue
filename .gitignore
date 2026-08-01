@@ -11,3 +11,8 @@ cue-data.json
 lookbook/state.json
 lookbook/logs/
 lookbook/__pycache__/
+lookbook2/state.json
+lookbook2/logs/
+lookbook3/state.json
+lookbook3/logs/
+__pycache__/
