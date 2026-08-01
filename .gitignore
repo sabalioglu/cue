@@ -10,3 +10,4 @@ cue-data.json
 !lookbook/out/
 lookbook/state.json
 lookbook/logs/
+lookbook/__pycache__/
