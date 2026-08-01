@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Lookbook Studio — tek dosyalik uretim kosucusu
-Attir butter yellow waffle polo · GPT Image 2 (Kie.ai)
+Powder blue washed linen shirt · GPT Image 2 (Kie.ai)
 
 Kullanim:
     pip install requests pillow numpy scikit-image
@@ -43,105 +43,115 @@ FAIL_STATES = {"fail", "failed", "error", "cancelled", "canceled"}
 # ─────────────────────────────────────────── URUN + KARAKTER + SAHNE
 
 GARMENT_DESC = (
-    "fine-gauge waffle knit cotton polo shirt, visible thermal waffle grid texture, "
-    "matte surface, boxy relaxed fit, drop shoulder, open placket with self-fabric tab "
-    "and NO buttons, johnny collar with soft roll, short straight sleeves, straight hem, "
-    "colour pale butter yellow with a soft green cast, light-to-mid weight, unlined"
+    "lightweight washed linen shirt, visible linen slub weave with fine irregular slubs "
+    "and soft natural crease character, matte surface, softly shaped relaxed fit that is "
+    "neither boxy nor tight, classic pointed collar with a soft roll, full-length button "
+    "placket with tonal mother-of-pearl buttons, long sleeves with buttoned barrel cuffs "
+    "and a short sleeve placket, curved shirttail hem dropping longer at the back, "
+    "colour pale powder blue, cool and very low in saturation, unlined"
 )
 
 CHARACTER = (
-    "Man, early 30s, Mediterranean features, warm olive-tan skin, dark tousled "
-    "medium-length hair, light stubble, straight dark brows, narrow nose bridge, "
-    "defined jawline, calm neutral expression, soft eyes, lean athletic build, "
-    "natural shoulders, 182cm"
+    "Woman, early 30s, Southern European features, light olive skin, dark brown "
+    "shoulder-length hair loosely tucked behind one ear, fine straight brows, soft "
+    "almond eyes, high cheekbones, straight nose, calm neutral expression, minimal "
+    "natural makeup, slim build, natural shoulders, 175cm"
 )
 
-# Bu urunun isik kisiti: L*=83.6, C*ab=26.5 -> acik pastel.
-# Sicak sert isik rengi hardala kaydirir, parlak gunes beyaza yakar.
+# Bu urunun isik kisiti: L*=85.7, C*ab=8.7, h=257deg -> cok acik, cok dusuk doygunluk.
+# Sicak isik bu maviyi griye dusurur; sert gunes L*'i 92 uzerine tasiyip beyaza yakar.
+# Acik gokyuzu golgesi ve deniz YASAK: soluk maviye mavi tasirip hue'yu cyan'a cevirir.
 SCENES = {
-    "aegean_shade": (
-        "whitewashed Aegean courtyard, rough lime-plaster walls, worn stone floor, "
-        "a single olive tree, weathered wooden shutters. Late morning, subject fully "
-        "in OPEN SHADE, soft north light, large white-wall bounce, neutral 5600K, "
-        "absolutely no direct sunlight on the subject or the garment"
+    "linen_daylight_room": (
+        "quiet empty room with rough off-white plaster walls and a pale grey stone floor, "
+        "one tall window with a sheer white curtain, no coloured or wooden surfaces near "
+        "the subject. Soft diffused north daylight through the curtain, large white bounce, "
+        "neutral 5600K, no direct sun patch on the subject or the garment, "
+        "no blue sky visible through the window"
     ),
-    "microcement": (
-        "empty micro-cement studio room, seamless neutral grey wall-to-floor transition. "
+    "studio_seamless": (
+        "empty studio, seamless off-white paper sweep, wall-to-floor transition. "
         "Large softbox 45 degrees camera left plus white bounce right, flat even key light, "
         "soft contact shadow only, neutral 5500K, no colour cast"
     ),
-    "night_flash": (
-        "narrow old-town street at night, shuttered storefronts, wet cobblestone. "
-        "Direct on-camera flash, hard falloff into deep black background, neutral flash "
-        "colour temperature, no warm ambient cast on the garment"
+    "overcast_terrace": (
+        "old stone terrace under a fully overcast white sky, weathered pale limestone paving "
+        "and a low plaster parapet, no sea and no blue sky in view, no coloured surfaces. "
+        "Soft shadowless overcast light, white balance corrected to neutral 5600K, "
+        "no cool blue cast on the garment"
     ),
 }
 
 BASE_CONSTRAINTS = (
     "no text, graphics, prints or logos on the garment; no accessories, no watch, "
-    "no sunglasses, no bag; natural hands with exactly five fingers; the garment must "
-    "stay boxy and relaxed, never fitted or tapered; the placket must stay open and "
-    "buttonless; the hem must stay straight, never curved or tailed; the waffle grid "
-    "texture must remain clearly visible; no warm orange colour cast on the garment; "
-    "the garment must not be blown out to white"
+    "no sunglasses, no bag, no jewellery; natural hands with exactly five fingers; "
+    "the shirt must stay buttoned with the placket visible and the collar sitting flat; "
+    "the sleeves must stay long with the cuffs buttoned at the wrist, never rolled up; "
+    "the curved shirttail hem must remain curved, never cut straight; the linen slub weave "
+    "and its natural crease character must remain clearly visible; no warm yellow or golden "
+    "colour cast on the garment; no strong cyan or saturated blue shift; the garment must "
+    "not be blown out to white"
 )
 
 SHOTS = [
-    dict(n=1,  scene="aegean_shade", ar="2:3", label="hero_fullbody",
-         shot="full body, subject mid-stride walking left to right, hands relaxed at sides, "
-              "gaze off-camera, unposed and natural",
+    dict(n=1,  scene="linen_daylight_room", ar="2:3", label="hero_fullbody",
+         shot="full body, subject mid-stride walking left to right past the window, hands "
+              "relaxed at sides, gaze off-camera, unposed and natural, linen moving softly",
          cam="85mm f/2.2, eye level, subject at right third, Portra 400 grain"),
-    dict(n=2,  scene="aegean_shade", ar="2:3", label="medium_wall",
-         shot="waist-up, subject leaning back against the plaster wall, one hand in pocket, "
-              "head turned slightly away",
-         cam="85mm f/2.0, chest level, collar and placket clearly readable"),
-    dict(n=3,  scene="aegean_shade", ar="1:1", label="detail_texture",
-         shot="tight macro crop of the shoulder and upper chest area of the garment only, "
-              "no face in frame, showing the waffle knit grid, the collar roll and the "
-              "shoulder seam in sharp detail",
-         cam="100mm macro, f/4, raking soft light to reveal texture relief"),
-    dict(n=4,  scene="aegean_shade", ar="2:3", label="back_view",
+    dict(n=2,  scene="linen_daylight_room", ar="2:3", label="medium_collar",
+         shot="waist-up, subject standing near the window turned slightly to the light, one "
+              "hand at her side, head turned a little away, collar and full button placket "
+              "clearly readable",
+         cam="85mm f/2.0, chest level, collar roll and buttons in focus"),
+    dict(n=3,  scene="linen_daylight_room", ar="1:1", label="detail_texture",
+         shot="tight macro crop of the shoulder and upper chest of the garment only, no face "
+              "in frame, showing the linen slub weave, the collar roll, the shoulder seam and "
+              "the top buttons in sharp detail",
+         cam="100mm macro, f/4, raking soft light to reveal the weave relief"),
+    dict(n=4,  scene="linen_daylight_room", ar="2:3", label="back_view",
          shot="full body from behind, subject standing still facing the wall, arms relaxed, "
-              "showing the back of the garment, the boxy volume and the straight hem",
+              "showing the back of the shirt, the yoke, the soft drape and the curved "
+              "shirttail hem dropping longer at the back",
          cam="85mm f/2.5, eye level, centred"),
-    dict(n=5,  scene="microcement",  ar="3:4", label="pdp_front",
+    dict(n=5,  scene="studio_seamless",  ar="3:4", label="pdp_front",
          shot="full body, subject standing straight facing camera, arms relaxed at sides, "
               "neutral expression, catalogue posture",
          cam="50mm f/5.6, chest level, subject centred, full garment visible"),
-    dict(n=6,  scene="microcement",  ar="3:4", label="pdp_three_quarter",
+    dict(n=6,  scene="studio_seamless",  ar="3:4", label="pdp_three_quarter",
          shot="full body, subject turned three-quarters to camera left, arms relaxed, "
               "catalogue posture",
          cam="50mm f/5.6, chest level, subject centred"),
-    dict(n=7,  scene="microcement",  ar="3:4", label="pdp_medium",
-         shot="chest to hip crop, subject facing camera, showing how the garment sits "
-              "on the body, the placket and the hem line",
+    dict(n=7,  scene="studio_seamless",  ar="3:4", label="pdp_medium",
+         shot="crop from collarbone to mid-thigh, head and face completely out of frame, "
+              "subject facing camera, showing how the shirt sits on the body, the button "
+              "placket and the full curved hem line",
          cam="85mm f/5.6, flat even light"),
-    dict(n=8,  scene="microcement",  ar="1:1", label="detail_finish",
-         shot="close crop showing the short sleeve opening and the straight bottom hem "
-              "of the garment, no face in frame",
+    dict(n=8,  scene="studio_seamless",  ar="1:1", label="detail_cuff",
+         shot="close crop of the forearm showing the buttoned barrel cuff and the short "
+              "sleeve placket, no face in frame",
          cam="100mm macro f/5.6, even light"),
-    dict(n=9,  scene="night_flash",  ar="4:5", label="social_candid",
+    dict(n=9,  scene="overcast_terrace",  ar="4:5", label="social_candid",
          shot="medium shot, subject caught mid-laugh looking slightly off camera, candid "
-              "snapshot energy, slight motion in the frame",
-         cam="35mm f/4, hip level, slight tilt, direct flash"),
-    dict(n=10, scene="night_flash",  ar="9:16", label="social_vertical",
-         shot="full body, subject walking towards camera at night, candid snapshot, "
+              "snapshot energy, hair and linen catching a little wind",
+         cam="35mm f/4, hip level, slight tilt, available overcast light"),
+    dict(n=10, scene="overcast_terrace",  ar="9:16", label="social_vertical",
+         shot="full body, subject walking towards camera across the terrace, candid snapshot, "
               "leave the top 15 percent and bottom 20 percent of the frame uncluttered "
               "for social media UI overlays",
-         cam="35mm f/4, waist level, direct flash"),
+         cam="35mm f/4, waist level, available overcast light"),
 ]
 
 
 def build_prompt(shot, with_hero: bool) -> str:
     ident = (
         "Reference image 1 is the GARMENT product photo - reproduce this exact garment: "
-        "its colour, its waffle texture, its cut and its proportions.\n"
+        "its colour, its weave texture, its cut and its proportions.\n"
         "Reference image 2 is the SAME MODEL from an earlier frame of this shoot - keep "
         "IDENTICAL facial identity: same eye shape, same nose bridge contour, same jawline "
-        "angle, same hairline, same stubble density, same skin tone.\n"
+        "angle, same hairline, same brow shape, same skin tone, same hair length.\n"
         if with_hero else
         "Reference image 1 is the GARMENT product photo - reproduce this exact garment: "
-        "its colour, its waffle texture, its cut and its proportions.\n"
+        "its colour, its weave texture, its cut and its proportions.\n"
     )
     return (
         f"Goal: editorial fashion lookbook frame {shot['n']} of 10, for e-commerce and social media.\n"
@@ -153,7 +163,7 @@ def build_prompt(shot, with_hero: bool) -> str:
         f"Camera: {shot['cam']}\n"
         f"Style: photorealistic editorial fashion photography, shot on film, "
         f"natural skin texture, no beauty retouching, no plastic skin\n"
-        f"Preserve: exact garment colour and waffle texture from reference image 1"
+        f"Preserve: exact garment colour and weave texture from reference image 1"
         f"{', exact facial identity from reference image 2' if with_hero else ''}\n"
         f"Constraints: {BASE_CONSTRAINTS}"
     )
@@ -201,7 +211,7 @@ def upload_garment(path: Path) -> str:
     body = {
         "base64Data": f"data:image/jpeg;base64,{b64}",
         "uploadPath": "images/lookbook",
-        "fileName": "attir_waffle_polo.jpg",
+        "fileName": "powder_blue_linen_shirt.jpg",
     }
     r = requests.post(UPLOAD, headers=hdrs(), json=body, timeout=180)
     (LOGS / "upload_response.json").write_text(r.text)
@@ -332,7 +342,7 @@ def qc_report(ref_path: Path, frames: list) -> str:
             f"{'PASS' if r['pass'] else '**FAIL** - ' + ', '.join(r['fails'])} |" for r in rows]
     npass = sum(r["pass"] for r in rows)
     return "\n".join([
-        "# QC raporu - Attir waffle polo lookbook", "",
+        "# QC raporu - powder blue linen shirt lookbook", "",
         f"Referans (urun fotografi): **L\\* {ref_lab[0]:.1f} - C\\*ab {rC:.1f} - h {rh:.1f}deg**", "",
         "Esikler: `dC*ab <= 2.0` - `dh <= 2.0deg` - `dL* <= 10` - `L* <= 92` - `doku orani >= 0.70`", "",
         "| kare | L* | C*ab | h(deg) | dC | dh | dL | doku | sonuc |",
