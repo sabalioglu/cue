@@ -463,7 +463,16 @@ def main():
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--weighting", choices=["equal","primary"], default="equal")
     ap.add_argument("--suffix", default="")
+    ap.add_argument("--views", default="",
+                    help="ablasyon: gonderilecek gorunumler, or. 'front' veya 'front,back'")
     a = ap.parse_args()
+
+    if a.views:
+        want = [v.strip() for v in a.views.split(",")]
+        VIEWS[:] = [v for v in VIEWS if v[0] in want]
+        if not VIEWS:
+            sys.exit(f"UNKNOWN_VIEWS: {a.views}")
+        print(f"-> ablasyon: sadece {[v[0] for v in VIEWS]} gonderiliyor")
 
     if a.check:
         sys.exit(0 if preflight() else 1)
