@@ -21,3 +21,20 @@
 -> shot 10 (social_vertical, 9:16, 2 referans)
     . waiting (0s)
     . generating (6s)
+    . success (96s)
+  + 10_social_vertical.png  (1942 KB)
+-> QC olcumu
+  + qc_report.md
+  + contact_sheet.jpg
+
+GECEN: 0/10
+  FAIL 01_hero_fullbody: hue dh=20.7deg, aciklik dL=23.6
+  FAIL 02_medium_collar: chroma dC=2.1, hue dh=11.5deg
+  FAIL 03_detail_texture: hue dh=15.9deg, aciklik dL=11.8
+  FAIL 04_back_view: chroma dC=3.9, hue dh=18.1deg, aciklik dL=20.3
+  FAIL 05_pdp_front: chroma dC=3.2, hue dh=22.2deg
+  FAIL 06_pdp_three_quarter: hue dh=19.0deg
+  FAIL 07_pdp_medium: chroma dC=2.5, hue dh=16.0deg
+  FAIL 08_detail_cuff: hue dh=7.0deg
+  FAIL 09_social_candid: hue dh=15.5deg, aciklik dL=13.3
+  FAIL 10_social_vertical: chroma dC=2.2, hue dh=37.0deg, aciklik dL=13.4
