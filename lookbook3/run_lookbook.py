@@ -91,7 +91,12 @@ SCENES = {
 }
 
 BASE_CONSTRAINTS = (
-    "no text, graphics, prints or logos on the garment; no accessories, no watch, "
+    # Coklu referansin yan etkisi: model "3 acidan gorsel" kurgusunu CIKTIYA
+    # tasiyip 3 panelli kolaj uretebiliyor (kare 9'da oldu). Tek kare sarti sart.
+    "the output must be ONE single photograph of one moment - never a collage, grid, "
+    "diptych, triptych, contact sheet or any multi-panel layout, and never more than one "
+    "view of the subject in the same image; "
+    "no text, graphics, prints or logos on the garment;no accessories, no watch, "
     "no sunglasses, no bag, no jewellery; natural hands with exactly five fingers; "
     "the stripes must stay horizontal, straight, parallel and even in width, following the "
     "curve of the body without wobbling, warping or moire; the stripe pitch must match the "

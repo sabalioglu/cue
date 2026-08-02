@@ -131,8 +131,11 @@ def main():
         # degerinin (%4.6) altinda kaliyordu, yani her kareyi kesin FAIL yapardi.
         hi_lim = max(ref["clip_hi"] * 3, 5.0)
         lo_lim = max(ref["clip_lo"] * 3, 15.0)
+        # Aci goruntunun dikeyine gore olculuyor; bu sadece govde dik durdugunda
+        # gecerli. Kol/omuz kirpmalarinda uzuv kadrajda capraz uzanir ve cizgiler
+        # dogru davranirken bile egik olcum verir - kirpma kareleri muaf.
         if not crop and dev > 20:        fails.append(f"cizgi sikligi %{dev:.0f}")
-        if m["angle"] > 8:               fails.append(f"aci {m['angle']:.0f}deg")
+        if not crop and m["angle"] > 8:  fails.append(f"aci {m['angle']:.0f}deg")
         if m["clip_hi"] > hi_lim:        fails.append(f"beyaz yanik %{m['clip_hi']:.1f}")
         if m["clip_lo"] > lo_lim:        fails.append(f"siyah tikali %{m['clip_lo']:.1f}")
         if m["contrast"] < ref["contrast"] * 0.55:
