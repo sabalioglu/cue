@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Lookbook Studio — tek dosyalik uretim kosucusu
-Powder blue washed linen shirt · GPT Image 2 (Kie.ai)
+Black & off-white striped shirt · GPT Image 2 (Kie.ai)
 
 Kullanim:
     pip install requests pillow numpy scikit-image
@@ -96,7 +96,7 @@ BASE_CONSTRAINTS = (
     "the output must be ONE single photograph of one moment - never a collage, grid, "
     "diptych, triptych, contact sheet or any multi-panel layout, and never more than one "
     "view of the subject in the same image; "
-    "no text, graphics, prints or logos on the garment;no accessories, no watch, "
+    "no text, graphics, prints or logos on the garment; no accessories, no watch, "
     "no sunglasses, no bag, no jewellery; natural hands with exactly five fingers; "
     "the stripes must stay horizontal, straight, parallel and even in width, following the "
     "curve of the body without wobbling, warping or moire; the stripe pitch must match the "
@@ -409,7 +409,7 @@ def qc_report(ref_path: Path, frames: list) -> str:
             f"{'PASS' if r['pass'] else '**FAIL** - ' + ', '.join(r['fails'])} |" for r in rows]
     npass = sum(r["pass"] for r in rows)
     return "\n".join([
-        "# QC raporu - powder blue linen shirt lookbook", "",
+        "# QC raporu - siyah/kirik beyaz cizgili gomlek lookbook", "",
         f"Referans (urun fotografi): **L\\* {ref_lab[0]:.1f} - C\\*ab {rC:.1f} - h {rh:.1f}deg**", "",
         "Esikler: `dC*ab <= 2.0` - `dh <= 2.0deg` - `dL* <= 10` - `L* <= 92` - `doku orani >= 0.70`", "",
         "| kare | L* | C*ab | h(deg) | dC | dh | dL | doku | kaplama | sonuc |",
